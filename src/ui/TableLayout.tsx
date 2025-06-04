@@ -146,8 +146,18 @@ export default function Tables() {
   }
 
   function agregarPatente(tipo: "AC" | "M", indice: number) {
-    const nuevaPatente = Math.floor(100000 + Math.random() * 900000);
     const randomLugares = Math.random() > 0.5 ? "A" : "C";
+    let nuevaPatente = 0;
+    while (true) {
+      const input = prompt("Ingrese una patente de 6 dígitos");
+      if (input === null) {
+        return;
+      }
+      if (/^\d{6}$/.test(input)) {
+        nuevaPatente = parseInt(input, 10);
+        break;
+      }
+    }
 
     if (tipo === "AC") {
       if (lugaresAC[indice] !== "D") return;
@@ -183,9 +193,16 @@ export default function Tables() {
             lugares={lugaresAC}
             patentes={patentesAC}
             recaudacion={recaudacionAC}
-            clickEvento={(indice: number) => {
-              setClickedIndexAC(indice);
-              setMostRecentlyClicked("AC");
+            clickEvento={(indice: number, e: React.MouseEvent) => {
+              switch (e.detail) {
+                case 1:
+                  setClickedIndexAC(indice);
+                  setMostRecentlyClicked("AC");
+                  break;
+                case 2:
+                  recaudarPatente(patentesAC[indice]);
+                  break;
+              }
             }}
             agregarPatente={(indice) => agregarPatente("AC", indice)}
           />
@@ -194,9 +211,16 @@ export default function Tables() {
             lugares={lugaresM}
             patentes={patentesM}
             recaudacion={recaudacionM}
-            clickEvento={(indice: number) => {
-              setClickedIndexM(indice);
-              setMostRecentlyClicked("M");
+            clickEvento={(indice: number, e: React.MouseEvent) => {
+              switch (e.detail) {
+                case 1:
+                  setClickedIndexM(indice);
+                  setMostRecentlyClicked("M");
+                  break;
+                case 2:
+                  recaudarPatente(patentesM[indice]);
+                  break;
+              }
             }}
             agregarPatente={(indice) => agregarPatente("M", indice)}
           />
@@ -212,12 +236,12 @@ export default function Tables() {
           <p className="text-xs opacity-60 text-center">
             {tipo === "AC"
               ? lugar === "A"
-                ? "Autos"
+                ? "Auto"
                 : lugar === "C"
-                  ? "Camionetas"
+                  ? "Camioneta"
                   : "Vacío"
               : lugar === "M"
-                ? "Motocicletas"
+                ? "Motocicleta"
                 : "Vacío"}
           </p>
         </div>
