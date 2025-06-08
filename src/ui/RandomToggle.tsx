@@ -1,21 +1,21 @@
 interface RandomToggleProps {
-  toggleEnabled: boolean;
+  toggleRandom: boolean;
   toggle: () => void;
 }
 
-export default function RandomToggle({ toggleEnabled, toggle }: RandomToggleProps) {
+export default function RandomToggle({ toggleRandom, toggle }: RandomToggleProps) {
   return (
     <button
       type="button"
-      aria-pressed={toggleEnabled}
+      aria-pressed={toggleRandom}
       onClick={toggle}
-      className={`absolute top-3 left-3 cursor-pointer border border-neutral-400/20 shadow-md w-12.25 h-fit rounded-full p-1 transition-all ${
-        toggleEnabled ? "shadow-white/15" : ""
+      className={`fixed top-3 left-3 cursor-pointer border border-neutral-400/20 shadow-md w-12.25 h-fit rounded-full p-1 transition-all ${
+        toggleRandom ? "shadow-white/15" : ""
       }`}
     >
       <div
         className={`w-5 h-5 bg-white flex justify-center items-center rounded-full transition-transform duration-200 ${
-          toggleEnabled ? "translate-x-full text-black" : "translate-x-0 text-neutral-500"
+          toggleRandom ? "translate-x-full text-black" : "translate-x-0 text-neutral-500"
         }`}
       >
         <svg

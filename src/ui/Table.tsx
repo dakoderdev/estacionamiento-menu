@@ -26,12 +26,16 @@ function TableButton({ estado, patente, indice, clickEvento, agregarPatente }: P
             break;
     }
 
+    function formatoPatente(patente: number): string {
+        return patente.toString().padStart(6, "0");
+    }
+
     return (
         <div
             onClick={e => clickEvento(indice, e)}
             className={`${claseFondo} hover:scale-105 transition-transform min-h-8 min-w-20 cursor-pointer w-full flex justify-center items-center border rounded-xl font-mono relative ${claseTexto} group`}
         >
-            {patente === 0 ? indice + 1 : patente}
+            {patente === 0 ? indice + 1 : formatoPatente(patente)}
             {patente === 0 && (
                 <span
                     onClick={e => agregarPatente()}
@@ -72,10 +76,19 @@ export default function Table({ tipo, lugares, patentes, recaudacion, clickEvent
     return (
         <div>
             <div className="border border-neutral-400/20 shadow-lg rounded-md w-fit p-3 grid grid-cols-5 gap-1.5">
-                <div className="flex gap-2 items-center col-span-full">
+                <div className="flex items-center gap-2 col-span-full relative">
                     <h3 className="text-lg font-semibold">{tipoTitulo}</h3>
-                    <span className="flex items-center gap-0.25 bg-green-600/20 text-green-300 text-xs mr-2 pl-2.5 pr-2.25 py-0.5 rounded-full">
+                    <span
+                        className={`flex items-center gap-0.25 bg-green-600/20 text-green-300 text-xs mr-2 pl-2.5 pr-2.25 py-0.5 rounded-full transition-transform duration-300 ${recaudacion > 0 ? "animate-bounce-alt" : ""}`}
+                        key={recaudacion}
+                    >
                         ${recaudacion}
+                        <span
+                            className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-3 opacity-0 animate-up"
+                            aria-hidden="true"
+                        >
+                            $
+                        </span>
                     </span>
                 </div>
                 {lugares.map((estado, indice) => (

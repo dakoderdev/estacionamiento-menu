@@ -7,25 +7,32 @@ export default function InfoPanel({
   patente,
   clase,
   recaudarPatente,
+  reubicarPatente,
   eliminarPatente,
 }: {
   clickedIndex: number;
   tipo: "AC" | "M";
   lugar: "A" | "C" | "M" | "D";
-  patente: number;
+  patente?: number;
   clase: ReturnType<typeof getClaseEstilo>;
   recaudarPatente: (patente: number) => void;
+  reubicarPatente: (patente: number) => void;
   eliminarPatente: () => void;
 }) {
+
+  function formatoPatente(patente: number): string {
+    return patente.toString().padStart(6, "0");
+  }
+    
   return (
-    <div className="absolute bottom-3 left-3 flex items-center gap-3 border border-neutral-400/20 shadow-lg rounded-md p-3">
+    <div className="fixed flex items-center gap-3 p-3 border rounded-md shadow-lg bottom-3 left-3 border-neutral-400/20 bg-background">
       <div className="flex flex-col aspect-5/4 h-14.5 justify-center items-center">
         <div
           className={`border-x-2 text-lg font-[family-name:var(--font-geist-mono)] ${clase.borde} transition-colors px-2`}
         >
           <p>{clickedIndex + 1}</p>
         </div>
-        <p className="text-xs opacity-60 text-center">
+        <p className="text-xs text-center opacity-60">
           {tipo === "AC"
             ? lugar === "A"
               ? "Auto"
@@ -42,18 +49,19 @@ export default function InfoPanel({
           patente === 0 ? "hidden" : ""
         } transition-colors absolute -top-[1px] left-1.5 -translate-y-full font-medium font-[family-name:var(--font-geist-mono)] min-h-8 min-w-20 flex flex-nowrap justify-center items-center border-x border-t rounded-t-xl w-fit ${clase.fondo} ${clase.texto} ${clase.bordeFondo}`}
       >
-        {patente}
+        {formatoPatente(patente || 0)}
       </h3>
       {patente !== 0 && (
         <div className="pl-3 text-lg h-14.5 gap-1.5 flex flex-col items-baseline border-l border-neutral-400/20">
-          <div className="flex gap-3 justify-between">
+          <div className="flex justify-between gap-3">
             <button
-              onClick={() => recaudarPatente(patente)}
+              onClick={() => recaudarPatente(patente || 0)}
               className={`text-xs ${clase.textoAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors ${clase.fondoAlt}`}
             >
               Recaudar
             </button>
             <button
+              onClick={() => reubicarPatente(patente || 0)}
               className={`text-xs ${clase.textoAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors ${clase.fondoAlt}`}
             >
               Reubicar

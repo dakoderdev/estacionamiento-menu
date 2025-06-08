@@ -10,6 +10,35 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --animate-bounce-alt: bounce 0.4s;
+  --animate-up: up 0.4s;
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+    50% {
+      transform: translateY(-10%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+  }
+
+  @keyframes up {
+    0% {
+      transform: none;
+      opacity: 0;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+    5% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-25%);
+      opacity: 0;
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {

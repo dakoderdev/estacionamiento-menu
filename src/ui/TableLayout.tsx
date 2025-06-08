@@ -3,153 +3,276 @@ import React, { useEffect, useState } from "react";
 import Table from "./Table";
 import RandomToggle from "./RandomToggle";
 import InfoPanel from "./InfoPanel";
+import Historial from "./Historial";
 import { getClaseEstilo } from "./style/GetClaseEstilo";
+import { log } from "console";
 
-const precioM = 800 as number;
-const precioA = 1500 as number;
-const precioC = 1800 as number;
+const precioM = 800;
+const precioA = 1500;
+const precioC = 1800;
+
+const capacidadAC = 30;
+const capacidadM = 20;
 
 export default function Tables() {
-  const capacidadAC = 30;
-  const capacidadM = 20;
-
   const [lugaresAC, setLugaresAC] = useState<("D" | "A" | "C")[]>([]);
   const [patentesAC, setPatentesAC] = useState<number[]>([]);
   const [lugaresM, setLugaresM] = useState<("D" | "M")[]>([]);
   const [patentesM, setPatentesM] = useState<number[]>([]);
-  const [clickedIndexAC, setClickedIndexAC] = useState(0);
-  const [clickedIndexM, setClickedIndexM] = useState(0);
+  const [indiceSeleccionadoAC, setIndiceSeleccionadoAC] = useState(0);
+  const [indiceSeleccionadoM, setIndiceSeleccionadoM] = useState(0);
   const [mostRecentlyClicked, setMostRecentlyClicked] = useState<"AC" | "M">("AC");
   const [recaudacionAC, setRecaudacionAC] = useState(0);
   const [recaudacionM, setRecaudacionM] = useState(0);
-  const [toggleEnabled, setToggleEnabled] = useState(false);
+  const [toggleRandom, setToggleRandom] = useState(false);
 
-  useEffect(() => {
-    const nuevaLugaresAC = Array(capacidadAC).fill("D") as ("D" | "A" | "C")[];
-    const nuevaPatentesAC = Array(capacidadAC).fill(0);
-    const nuevaLugaresM = Array(capacidadM).fill("D") as ("D" | "M")[];
-    const nuevaPatentesM = Array(capacidadM).fill(0);
-
-    const indicesMAsignados = new Set<number>();
-    while (indicesMAsignados.size < 5) {
-      const indice = Math.floor(Math.random() * capacidadM);
-      if (!indicesMAsignados.has(indice)) {
-        nuevaLugaresM[indice] = "M";
-        nuevaPatentesM[indice] = Math.floor(100000 + Math.random() * 900000);
-        indicesMAsignados.add(indice);
+  function generarPatenteUnica(patentesAC: number[], patentesM: number[]): number {
+    while (true) {
+      const nueva = Math.floor(100000 + Math.random() * 900000);
+      if (!patentesAC.includes(nueva) && !patentesM.includes(nueva)) {
+        return nueva;
       }
-    }
-
-    const indicesAAsignados = new Set<number>();
-    while (indicesAAsignados.size < 5) {
-      const indice = Math.floor(Math.random() * capacidadAC);
-      if (!indicesAAsignados.has(indice)) {
-        nuevaLugaresAC[indice] = "A";
-        nuevaPatentesAC[indice] = Math.floor(100000 + Math.random() * 900000);
-        indicesAAsignados.add(indice);
-      }
-    }
-
-    const indicesCAsignados = new Set<number>();
-    while (indicesCAsignados.size < 5) {
-      const indice = Math.floor(Math.random() * capacidadAC);
-      if (!indicesAAsignados.has(indice) && !indicesCAsignados.has(indice)) {
-        nuevaLugaresAC[indice] = "C";
-        nuevaPatentesAC[indice] = Math.floor(100000 + Math.random() * 900000);
-        indicesCAsignados.add(indice);
-      }
-    }
-
-    setLugaresAC(nuevaLugaresAC);
-    setPatentesAC(nuevaPatentesAC);
-    setLugaresM(nuevaLugaresM);
-    setPatentesM(nuevaPatentesM);
-  }, []);
-
-  function eliminarPatente() {
-    if (tipo === "AC") {
-      const nuevaLugares = [...lugaresAC];
-      const nuevasPatentes = [...patentesAC];
-      nuevaLugares[clickedIndexAC] = "D";
-      nuevasPatentes[clickedIndexAC] = 0;
-      setLugaresAC(nuevaLugares);
-      setPatentesAC(nuevasPatentes);
-    } else {
-      const nuevaLugares = [...lugaresM];
-      const nuevasPatentes = [...patentesM];
-      nuevaLugares[clickedIndexM] = "D";
-      nuevasPatentes[clickedIndexM] = 0;
-      setLugaresM(nuevaLugares);
-      setPatentesM(nuevasPatentes);
     }
   }
 
-  function recaudarPatente(patente: number) {
-    if (tipo === "AC") {
-      if (lugar === "A") {
-        setRecaudacionAC(recaudacionAC + precioA);
-      } else if (lugar === "C") {
-        setRecaudacionAC(recaudacionAC + precioC);
+  function getInfoSeleccionada() {
+    const tipo = mostRecentlyClicked;
+    const clickedIndex = tipo === "AC" ? indiceSeleccionadoAC : indiceSeleccionadoM;
+    const lugar = tipo === "AC" ? lugaresAC[clickedIndex] : lugaresM[clickedIndex];
+    const patente = tipo === "AC" ? patentesAC[clickedIndex] ?? 0 : patentesM[clickedIndex] ?? 0;
+    return { tipo, clickedIndex, lugar, patente };
+  }
+
+  const info = getInfoSeleccionada();
+  const clase = getClaseEstilo(info.lugar);
+
+  function inicializarEstacionamiento() {
+    const estadoLugaresAC = Array(capacidadAC).fill("D") as ("D" | "A" | "C")[];
+    const estadoPatentesAC = Array(capacidadAC).fill(0);
+    const estadoLugaresM = Array(capacidadM).fill("D") as ("D" | "M")[];
+    const estadoPatentesM = Array(capacidadM).fill(0);
+
+    const indicesAsignadosM = new Set<number>();
+    while (indicesAsignadosM.size < 5) {
+      const indice = Math.floor(Math.random() * capacidadM);
+      if (!indicesAsignadosM.has(indice)) {
+        estadoLugaresM[indice] = "M";
+        estadoPatentesM[indice] = generarPatenteUnica(estadoPatentesAC, estadoPatentesM);
+        indicesAsignadosM.add(indice);
       }
-    } else if (tipo === "M" && lugar === "M") {
-      setRecaudacionM(recaudacionM + precioM);
     }
-    eliminarPatente();
+
+    const indicesAsignadosA = new Set<number>();
+    while (indicesAsignadosA.size < 5) {
+      const indice = Math.floor(Math.random() * capacidadAC);
+      if (!indicesAsignadosA.has(indice)) {
+        estadoLugaresAC[indice] = "A";
+        estadoPatentesAC[indice] = generarPatenteUnica(estadoPatentesAC, estadoPatentesM);
+        indicesAsignadosA.add(indice);
+      }
+    }
+
+    const indicesAsignadosC = new Set<number>();
+    while (indicesAsignadosC.size < 5) {
+      const indice = Math.floor(Math.random() * capacidadAC);
+      if (!indicesAsignadosA.has(indice) && !indicesAsignadosC.has(indice)) {
+        estadoLugaresAC[indice] = "C";
+        estadoPatentesAC[indice] = generarPatenteUnica(estadoPatentesAC, estadoPatentesM);
+        indicesAsignadosC.add(indice);
+      }
+    }
+
+    setLugaresAC(estadoLugaresAC);
+    setPatentesAC(estadoPatentesAC);
+    setLugaresM(estadoLugaresM);
+    setPatentesM(estadoPatentesM);
+  }
+
+  useEffect(() => {
+    inicializarEstacionamiento();
+  }, []);
+
+  const [historial, setHistorial] = useState<
+    {
+      indice: number;
+      tipo: "A" | "C" | "M";
+      evento: string;
+      patente: number;
+      fecha: string;
+      hora: string;
+      amPm: "AM" | "PM" | "";
+    }[]
+  >([]);
+
+  function logEvento(indice: number, tipo: "A" | "C" | "M", evento: string, patente: number) {
+    const now = new Date();
+
+    const fecha = new Intl.DateTimeFormat('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(now);
+
+    const hora = new Intl.DateTimeFormat('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(now);
+
+    let amPm = '';
+    const amPmFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      hour12: true,
+    });
+    const formattedAmPm = amPmFormatter.format(now);
+    if (formattedAmPm.includes('AM')) {
+      amPm = 'AM';
+    } else if (formattedAmPm.includes('PM')) {
+      amPm = 'PM';
+    }
+
+    const log = {
+      indice,
+      tipo,
+      evento,
+      patente,
+      fecha,
+      hora,
+      amPm: amPm as "" | "AM" | "PM",
+    };
+    console.log(`[HISTORIAL]`, log);
+    setHistorial(prev => [...prev, log]);
+  }
+
+  function eliminarPatente(tipo: "AC" | "M", indice: number, recaudado = false) {
+    if (tipo === "AC") {
+      const estadoLugares = [...lugaresAC];
+      const nuevasPatentes = [...patentesAC];
+      const tipoLugar = estadoLugares[indice]; // "A" | "C" | "D"
+      estadoLugares[indice] = "D";
+      nuevasPatentes[indice] = 0;
+      setLugaresAC(estadoLugares);
+      setPatentesAC(nuevasPatentes);
+      if (tipoLugar === "A" || tipoLugar === "C") {
+        logEvento(indice, tipoLugar, recaudado ? "Recaudado" : "Eliminado", patentesAC[indice]);
+      }
+    } else {
+      const estadoLugares = [...lugaresM];
+      const nuevasPatentes = [...patentesM];
+      const tipoLugar = estadoLugares[indice]; // "M" | "D"
+      estadoLugares[indice] = "D";
+      nuevasPatentes[indice] = 0;
+      setLugaresM(estadoLugares);
+      setPatentesM(nuevasPatentes);
+      if (tipoLugar === "M") {
+        logEvento(indice, tipoLugar, recaudado ? "Recaudado" : "Eliminado", patentesM[indice]);
+      }
+    }
+  }
+
+  function recaudarPatente(tipo: "AC" | "M", indice: number) {
+    const lugar = tipo === "AC" ? lugaresAC[indice] : lugaresM[indice];
+
+    if (tipo === "AC") {
+      if (lugar === "A") setRecaudacionAC(prev => prev + precioA);
+      else if (lugar === "C") setRecaudacionAC(prev => prev + precioC);
+    } else {
+      if (lugar === "M") setRecaudacionM(prev => prev + precioM);
+    }
+
+    eliminarPatente(tipo, indice, true);
+  }
+
+  function reubicarPatente(tipo: "AC" | "M", indice: number) {
+    const lugar = tipo === "AC" ? lugaresAC[indice] : lugaresM[indice];
+    if (lugar === "D") return;
+    let max = tipo === "AC" ? 30 : 20;
+    let nuevoLugarStr = prompt(`Ingrese un lugar vacio del 1 al ${max} donde quieras reubicar`);
+    if (!nuevoLugarStr) return;
+    const nuevoIndice = parseInt(nuevoLugarStr, 10) - 1;
+    if (isNaN(nuevoIndice) || nuevoIndice < 0 || nuevoIndice >= max) {
+      alert("Índice inválido.");
+      return;
+    }
+    const isAC = tipo === "AC";
+    const lugares = isAC ? [...lugaresAC] : [...lugaresM];
+    const patentes = isAC ? [...patentesAC] : [...patentesM];
+
+    if (lugares[nuevoIndice] !== "D") {
+      alert("Ese lugar no está vacío.");
+      return;
+    }
+
+    lugares[nuevoIndice] = lugares[indice];
+    patentes[nuevoIndice] = patentes[indice];
+    lugares[indice] = "D";
+    patentes[indice] = 0;
+
+    if (isAC) {
+      setLugaresAC(lugares as ("A" | "C" | "D")[]);
+      setPatentesAC(patentes);
+    } else {
+      setLugaresM(lugares as ("M" | "D")[]);
+      setPatentesM(patentes);
+    }
   }
 
   function agregarPatente(tipo: "AC" | "M", indice: number) {
     const randomLugares = Math.random() > 0.5 ? "A" : "C";
     let nuevaPatente = 0;
     while (true) {
-      if (toggleEnabled) {
-        nuevaPatente = Math.floor(100000 + Math.random() * 900000);
-        const existeEnAC = patentesAC.includes(nuevaPatente);
-        const existeEnM = patentesM.includes(nuevaPatente);
-        if (!existeEnAC && !existeEnM) {
-          break;
-        }
+      if (toggleRandom) {
+        nuevaPatente = generarPatenteUnica(patentesAC, patentesM);
+        break;
       } else {
         const input = prompt("Ingrese una patente de 6 dígitos");
         if (input === null) {
           return;
         }
         if (/^\d{6}$/.test(input)) {
-          nuevaPatente = parseInt(input, 10);
-          const existeEnAC = patentesAC.includes(nuevaPatente);
-          const existeEnM = patentesM.includes(nuevaPatente);
-          if (!existeEnAC && !existeEnM) {
-            break;
-          } else {
+          const candidato = parseInt(input, 10);
+          const existe = patentesAC.includes(candidato) || patentesM.includes(candidato);
+          if (existe) {
             alert("La patente ya está registrada.");
+            return;
           }
+          nuevaPatente = candidato;
+          break;
         }
       }
     }
 
     if (tipo === "AC") {
       if (lugaresAC[indice] !== "D") return;
-      const nuevaLugares = [...lugaresAC];
+      logEvento(indice, randomLugares, "Agregado", nuevaPatente); // Use randomLugares ("A" or "C")
+      const estadoLugares = [...lugaresAC];
       const nuevasPatentes = [...patentesAC];
-      nuevaLugares[indice] = randomLugares;
+      estadoLugares[indice] = randomLugares;
       nuevasPatentes[indice] = nuevaPatente;
-      setLugaresAC(nuevaLugares);
+      setLugaresAC(estadoLugares);
       setPatentesAC(nuevasPatentes);
     } else {
       if (lugaresM[indice] !== "D") return;
-      const nuevaLugares = [...lugaresM];
+      logEvento(indice, "M", "Agregado", nuevaPatente); // Always "M" for motos
+      const estadoLugares = [...lugaresM];
       const nuevasPatentes = [...patentesM];
-      nuevaLugares[indice] = "M";
+      estadoLugares[indice] = "M";
       nuevasPatentes[indice] = nuevaPatente;
-      setLugaresM(nuevaLugares);
+      setLugaresM(estadoLugares);
       setPatentesM(nuevasPatentes);
     }
   }
 
   function toggle() {
-    setToggleEnabled(!toggleEnabled);
+    setToggleRandom(!toggleRandom);
   }
 
-  function handleClick(tipo: "AC" | "M", setClickedIndex: (i: number) => void, patentes: number[], setMostRecentlyClicked: (t: "AC" | "M") => void) {
+  function handleClick(
+    tipo: "AC" | "M",
+    setClickedIndex: React.Dispatch<React.SetStateAction<number>>,
+    patentes: number[],
+    setMostRecentlyClicked: React.Dispatch<React.SetStateAction<"AC" | "M">>
+  ) {
     return (indice: number, e: React.MouseEvent) => {
       switch (e.detail) {
         case 1:
@@ -157,24 +280,18 @@ export default function Tables() {
           setMostRecentlyClicked(tipo);
           break;
         case 2:
-          recaudarPatente(patentes[indice]);
+          recaudarPatente(tipo, indice);
           break;
       }
     };
   }
 
-  const handleClickAC = handleClick("AC", setClickedIndexAC, patentesAC, setMostRecentlyClicked);
-  const handleClickM = handleClick("M", setClickedIndexM, patentesM, setMostRecentlyClicked);
-
-  const tipo = mostRecentlyClicked;
-  const clickedIndex = tipo === "AC" ? clickedIndexAC : clickedIndexM;
-  const lugar = tipo === "AC" ? lugaresAC[clickedIndex] : lugaresM[clickedIndex];
-  const patente = tipo === "AC" ? patentesAC[clickedIndex] : patentesM[clickedIndex];
-  const clase = getClaseEstilo(lugar);
+  const handleClickAC = handleClick("AC", setIndiceSeleccionadoAC, patentesAC, setMostRecentlyClicked);
+  const handleClickM = handleClick("M", setIndiceSeleccionadoM, patentesM, setMostRecentlyClicked);
 
   return (
-    <div className="flex justify-center gap-4">
-      <RandomToggle toggleEnabled={toggleEnabled} toggle={toggle} />
+    <div className="grid grid-cols-2 mx-auto gap-4 w-fit">
+      <RandomToggle toggleRandom={toggleRandom} toggle={toggle} />
       {lugaresAC.length > 0 && lugaresM.length > 0 && (
         <>
           <Table
@@ -193,17 +310,53 @@ export default function Tables() {
             clickEvento={handleClickM}
             agregarPatente={indice => agregarPatente("M", indice)}
           />
+          <Historial historial={historial} />
         </>
       )}
       <InfoPanel
-        clickedIndex={clickedIndex}
-        tipo={tipo}
-        lugar={lugar}
-        patente={patente}
+        clickedIndex={info.clickedIndex}
+        tipo={info.tipo}
+        lugar={info.lugar}
+        patente={info.patente}
         clase={clase}
-        recaudarPatente={recaudarPatente}
-        eliminarPatente={eliminarPatente}
+        recaudarPatente={() => recaudarPatente(info.tipo, info.clickedIndex)}
+        reubicarPatente={() => reubicarPatente(info.tipo, info.clickedIndex)}
+        eliminarPatente={() => eliminarPatente(info.tipo, info.clickedIndex)}
       />
     </div>
   );
 }
+
+/*
+Historial de movimientos
+Guarda un historial de entradas, salidas, recaudaciones y reubicaciones de patentes, mostrando fecha y hora.
+
+Búsqueda de patente
+Permite buscar una patente específica y resalta su ubicación en el estacionamiento.
+
+Estadísticas y reportes
+Muestra estadísticas como ocupación actual, recaudación total, recaudación por tipo de vehículo, tiempo promedio de estadía, etc.
+
+Reserva de lugares
+Permite reservar lugares para ciertos vehículos o tipos de usuarios.
+
+Soporte para diferentes tarifas
+Tarifas variables según el horario, el día o el tipo de vehículo.
+
+Notificaciones
+Alertas cuando el estacionamiento está lleno, cuando un lugar queda disponible, o cuando una patente lleva mucho tiempo estacionada.
+
+Exportar datos
+Opción para exportar el historial o las estadísticas a CSV o PDF.
+
+Soporte para usuarios/roles
+Diferentes niveles de acceso: administrador, operador, visitante.
+
+Visualización gráfica
+Un mapa visual del estacionamiento mostrando los lugares ocupados/libres y el tipo de vehículo.
+
+Integración con cámaras o sensores
+Simulación o integración real para detectar automáticamente la entrada/salida de vehículos.
+
+Estas ideas pueden ayudarte a seguir expandiendo tu proyecto y hacerlo más útil y profesional.
+*/
