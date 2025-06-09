@@ -5,14 +5,9 @@ import RandomToggle from "./RandomToggle";
 import InfoPanel from "./InfoPanel";
 import Historial from "./Historial";
 import { getClaseEstilo } from "./style/GetClaseEstilo";
-import { log } from "console";
+import { getAllSettings } from "./style/GetSettings";
 
-const precioM = 800;
-const precioA = 1500;
-const precioC = 1800;
-
-const capacidadAC = 30;
-const capacidadM = 20;
+const { precioA, precioM, precioC, capacidadAC, capacidadM } = getAllSettings();
 
 export default function Tables() {
   const [lugaresAC, setLugaresAC] = useState<("D" | "A" | "C")[]>([]);
@@ -53,7 +48,7 @@ export default function Tables() {
     const estadoPatentesM = Array(capacidadM).fill(0);
 
     const indicesAsignadosM = new Set<number>();
-    while (indicesAsignadosM.size < 5) {
+    while (indicesAsignadosM.size < 10) {
       const indice = Math.floor(Math.random() * capacidadM);
       if (!indicesAsignadosM.has(indice)) {
         estadoLugaresM[indice] = "M";
@@ -63,7 +58,7 @@ export default function Tables() {
     }
 
     const indicesAsignadosA = new Set<number>();
-    while (indicesAsignadosA.size < 5) {
+    while (indicesAsignadosA.size < 10) {
       const indice = Math.floor(Math.random() * capacidadAC);
       if (!indicesAsignadosA.has(indice)) {
         estadoLugaresAC[indice] = "A";
@@ -73,7 +68,7 @@ export default function Tables() {
     }
 
     const indicesAsignadosC = new Set<number>();
-    while (indicesAsignadosC.size < 5) {
+    while (indicesAsignadosC.size < 10) {
       const indice = Math.floor(Math.random() * capacidadAC);
       if (!indicesAsignadosA.has(indice) && !indicesAsignadosC.has(indice)) {
         estadoLugaresAC[indice] = "C";
@@ -140,7 +135,6 @@ export default function Tables() {
       hora,
       amPm: amPm as "" | "AM" | "PM",
     };
-    console.log(`[HISTORIAL]`, log);
     setHistorial(prev => [...prev, log]);
   }
 
@@ -202,6 +196,8 @@ export default function Tables() {
       alert("Ese lugar no está vacío.");
       return;
     }
+
+    logEvento(indice, lugar as "A" | "C" | "M", "Reubicado", patentes[indice]);
 
     lugares[nuevoIndice] = lugares[indice];
     patentes[nuevoIndice] = patentes[indice];
@@ -297,6 +293,7 @@ export default function Tables() {
           <Table
             tipo="AC"
             lugares={lugaresAC}
+            lugar={info.lugar}
             patentes={patentesAC}
             recaudacion={recaudacionAC}
             clickEvento={handleClickAC}
@@ -305,6 +302,7 @@ export default function Tables() {
           <Table
             tipo="M"
             lugares={lugaresM}
+            lugar={info.lugar}
             patentes={patentesM}
             recaudacion={recaudacionM}
             clickEvento={handleClickM}
@@ -328,9 +326,6 @@ export default function Tables() {
 }
 
 /*
-Historial de movimientos
-Guarda un historial de entradas, salidas, recaudaciones y reubicaciones de patentes, mostrando fecha y hora.
-
 Búsqueda de patente
 Permite buscar una patente específica y resalta su ubicación en el estacionamiento.
 

@@ -1,3 +1,6 @@
+import React from 'react';
+import { getCurrentPrecio } from './style/GetSettings';
+
 interface PropsEspacioEstacionamiento {
     estado: "D" | "A" | "C" | "M";
     patente: number;
@@ -31,37 +34,47 @@ function TableButton({ estado, patente, indice, clickEvento, agregarPatente }: P
     }
 
     return (
-        <div
-            onClick={e => clickEvento(indice, e)}
-            className={`${claseFondo} hover:scale-105 transition-transform min-h-8 min-w-20 cursor-pointer w-full flex justify-center items-center border rounded-xl font-mono relative ${claseTexto} group`}
+        <button
+            onClick={e => {
+                clickEvento(indice, e);
+                if (patente === 0) {
+                    agregarPatente();
+                }
+            }}
+            className={`${claseFondo} hover:scale-105 focus-within:scale-105 transition-transform min-h-8 min-w-20 cursor-pointer w-full flex justify-center items-center border rounded-xl font-mono relative ${claseTexto} group`}
         >
-            {patente === 0 ? indice + 1 : formatoPatente(patente)}
-            {patente === 0 && (
-                <span
-                    onClick={e => agregarPatente()}
-                    onDoubleClick={() => window.alert("Double clicked!")}
-                    className="absolute inset-0 flex items-center justify-center"
-                >
-                    <span className="opacity-0 group-hover:opacity-100 pb-0.5 transition-opacity bg-neutral-400 text-black rounded-full w-5 h-5 flex items-center justify-center text-lg font-bold shadow">
-                        +
+            {patente === 0 ? (
+                <>
+                    {indice + 1}
+                    <span
+                        aria-label="Agregar patente"
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    >
+                        <span className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pb-0.5 transition-opacity bg-neutral-400 text-black rounded-full w-5 h-5 flex items-center justify-center text-lg font-bold shadow">
+                            +
+                        </span>
                     </span>
-                </span>
+                </>
+            ) : (
+                formatoPatente(patente)
             )}
-        </div>
+        </button>
     );
 }
 
 interface PropsPantallaEstacionamiento {
     tipo: "AC" | "M";
     lugares: ("D" | "A" | "C" | "M")[];
+    lugar: "D" | "A" | "C" | "M";
     patentes: number[];
     recaudacion: number;
     clickEvento: (indice: number, e: React.MouseEvent) => void;
     agregarPatente: (indice: number) => void;
 }
 
-export default function Table({ tipo, lugares, patentes, recaudacion, clickEvento, agregarPatente }: PropsPantallaEstacionamiento) {
+export default function Table({ tipo, lugares, lugar, patentes, recaudacion, clickEvento, agregarPatente }: PropsPantallaEstacionamiento) {
     let tipoTitulo: string;
+    let precio = getCurrentPrecio(lugar);
     switch (tipo) {
         case "AC":
             tipoTitulo = "Autos/Camionetas";
@@ -87,7 +100,7 @@ export default function Table({ tipo, lugares, patentes, recaudacion, clickEvent
                             className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-3 opacity-0 animate-up"
                             aria-hidden="true"
                         >
-                            $
+                            ${precio}
                         </span>
                     </span>
                 </div>
