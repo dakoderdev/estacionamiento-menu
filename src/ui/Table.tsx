@@ -86,6 +86,9 @@ export default function Table({ tipo, lugares, lugar, patentes, recaudacion, cli
             tipoTitulo = "Placeholder";
             break;
     }
+    function formatoRecaudacion() {
+        return recaudacion.toLocaleString()
+    }
     return (
         <div>
             <div className="border border-neutral-400/20 shadow-lg rounded-md w-fit p-3 grid grid-cols-5 gap-1.5">
@@ -95,7 +98,7 @@ export default function Table({ tipo, lugares, lugar, patentes, recaudacion, cli
                         className={`flex items-center gap-0.25 bg-green-600/20 text-green-300 text-xs mr-2 pl-2.5 pr-2.25 py-0.5 rounded-full transition-transform duration-300 ${recaudacion > 0 ? "animate-bounce-alt" : ""}`}
                         key={recaudacion}
                     >
-                        ${recaudacion}
+                        ${formatoRecaudacion()}
                         <span
                             className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-3 opacity-0 animate-up"
                             aria-hidden="true"

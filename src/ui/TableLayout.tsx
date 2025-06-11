@@ -4,10 +4,9 @@ import Table from "./Table";
 import RandomToggle from "./RandomToggle";
 import InfoPanel from "./InfoPanel";
 import Historial from "./Historial";
+import PreciosPanel from "./PreciosPanel";
 import { getClaseEstilo } from "./style/GetClaseEstilo";
 import { getAllSettings } from "./style/GetSettings";
-
-const { precioA, precioM, precioC, capacidadAC, capacidadM } = getAllSettings();
 
 export default function Tables() {
   const [lugaresAC, setLugaresAC] = useState<("D" | "A" | "C")[]>([]);
@@ -20,6 +19,10 @@ export default function Tables() {
   const [recaudacionAC, setRecaudacionAC] = useState(0);
   const [recaudacionM, setRecaudacionM] = useState(0);
   const [toggleRandom, setToggleRandom] = useState(false);
+
+  const initialSettings = getAllSettings();
+  const capacidadAC = initialSettings.capacidadAC;
+  const capacidadM = initialSettings.capacidadM;
 
   function generarPatenteUnica(patentesAC: number[], patentesM: number[]): number {
     while (true) {
@@ -166,6 +169,7 @@ export default function Tables() {
 
   function recaudarPatente(tipo: "AC" | "M", indice: number) {
     const lugar = tipo === "AC" ? lugaresAC[indice] : lugaresM[indice];
+    const { precioA, precioM, precioC } = getAllSettings();
 
     if (tipo === "AC") {
       if (lugar === "A") setRecaudacionAC(prev => prev + precioA);
@@ -321,6 +325,7 @@ export default function Tables() {
         reubicarPatente={() => reubicarPatente(info.tipo, info.clickedIndex)}
         eliminarPatente={() => eliminarPatente(info.tipo, info.clickedIndex)}
       />
+      <PreciosPanel />
     </div>
   );
 }

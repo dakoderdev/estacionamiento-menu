@@ -131,19 +131,19 @@ export default function InfoPanel({
           <div className="flex justify-between gap-3">
             <button
               onClick={() => recaudarPatente(patente || 0)}
-              className={`text-xs ${clase.textoAlt} ${clase.fondoAlt} border ${clase.bordeAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors`}
+              className={`text-xs ${clase.textoAlt} ${clase.fondoAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors`}
             >
               Recaudar
             </button>
             <button
               onClick={() => reubicarPatente(patente || 0)}
-              className={`text-xs ${clase.textoAlt} ${clase.fondoAlt} border ${clase.bordeAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors`}
+              className={`text-xs ${clase.textoAlt} ${clase.fondoAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors`}
             >
               Reubicar
             </button>
             <button
               onClick={eliminarPatente}
-              className={`text-xs ${clase.textoAlt} ${clase.fondoAlt} border ${clase.bordeAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors`}
+              className={`text-xs ${clase.textoAlt} ${clase.fondoAlt} font-medium min-h-8 px-7 cursor-pointer rounded-full transition-colors`}
             >
               Eliminar
             </button>

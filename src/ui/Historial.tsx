@@ -252,7 +252,7 @@ const getVehicleIcon = (tipo: "A" | "C" | "M") => {
 export default function Historial({ historial }: HistorialProps) {
   return (
     <div className="relative border border-neutral-400/20 w-full shadow-lg rounded-md overflow-hidden max-h-50">
-      <h3 className="absolute top-0 w-[calc(100%-10px)] bg-background/85 backdrop-blur-sm z-10 text-lg font-semibold p-3 pb-1.5">
+      <h3 className="absolute top-0 w-[calc(100%-10px)] bg-background/85 border-b border-background backdrop-blur-sm z-10 text-lg font-semibold p-3 pb-1.5">
         Historial
       </h3>
       <div className="overflow-y-scroll pt-[3rem] h-full">
@@ -279,7 +279,7 @@ export default function Historial({ historial }: HistorialProps) {
                   <span
                     className={`${getTipoBadgeClass(
                       item.tipo
-                    )} w-fit border flex items-center gap-0.5 text-xs mr-2 pl-2.5 pr-2.25 py-1 rounded-full`}
+                    )} w-fit border font-[family-name:var(--font-geist-mono)] flex items-center gap-0.5 text-xs mr-2 pl-2.5 pr-2.25 py-1 rounded-full`}
                   >
                     {getVehicleIcon(item.tipo)}
                     {item.patente}
