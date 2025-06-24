@@ -44,7 +44,7 @@ export default function Tables() {
   const info = getInfoSeleccionada();
   const clase = getClaseEstilo(info.lugar);
 
-  function inicializarEstacionamiento() {
+  const inicializarEstacionamiento = React.useCallback(() => {
     const estadoLugaresAC = Array(capacidadAC).fill("D") as ("D" | "A" | "C")[];
     const estadoPatentesAC = Array(capacidadAC).fill(0);
     const estadoLugaresM = Array(capacidadM).fill("D") as ("D" | "M")[];
@@ -84,11 +84,11 @@ export default function Tables() {
     setPatentesAC(estadoPatentesAC);
     setLugaresM(estadoLugaresM);
     setPatentesM(estadoPatentesM);
-  }
+  }, [capacidadAC, capacidadM, generarPatenteUnica]);
 
   useEffect(() => {
     inicializarEstacionamiento();
-  }, []);
+  }, [inicializarEstacionamiento]);
 
   const [historial, setHistorial] = useState<
     {
@@ -184,8 +184,8 @@ export default function Tables() {
   function reubicarPatente(tipo: "AC" | "M", indice: number) {
     const lugar = tipo === "AC" ? lugaresAC[indice] : lugaresM[indice];
     if (lugar === "D") return;
-    let max = tipo === "AC" ? 30 : 20;
-    let nuevoLugarStr = prompt(`Ingrese un lugar vacio del 1 al ${max} donde quieras reubicar`);
+    const max = tipo === "AC" ? 30 : 20;
+    const nuevoLugarStr = prompt(`Ingrese un lugar vacio del 1 al ${max} donde quieras reubicar`);
     if (!nuevoLugarStr) return;
     const nuevoIndice = parseInt(nuevoLugarStr, 10) - 1;
     if (isNaN(nuevoIndice) || nuevoIndice < 0 || nuevoIndice >= max) {

@@ -74,7 +74,7 @@ interface PropsPantallaEstacionamiento {
 
 export default function Table({ tipo, lugares, lugar, patentes, recaudacion, clickEvento, agregarPatente }: PropsPantallaEstacionamiento) {
     let tipoTitulo: string;
-    let precio = getCurrentPrecio(lugar);
+    const precio = getCurrentPrecio(lugar);
     switch (tipo) {
         case "AC":
             tipoTitulo = "Autos/Camionetas";
