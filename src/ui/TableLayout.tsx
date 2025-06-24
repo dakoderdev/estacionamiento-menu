@@ -7,6 +7,7 @@ import Historial from "./Historial";
 import PreciosPanel from "./PreciosPanel";
 import { getClaseEstilo } from "./style/GetClaseEstilo";
 import { getAllSettings } from "./style/GetSettings";
+import TicketPopups from "./popups/TicketPopups";
 
 // Move this function outside the component to avoid infinite re-renders
 function generarPatenteUnica(patentesAC: number[], patentesM: number[]): number {
@@ -264,6 +265,53 @@ export default function Tables() {
     }
   }
 
+  const [ticketModalOpen, setTicketModalOpen] = useState(false);
+  const [ticketData, setTicketData] = useState<{
+    patente: number;
+    lugar: "A" | "C" | "D" | "M";
+    fechaIngreso: string;
+    fechaEgreso: string;
+    horaIngreso: string;
+    horaEgreso: string;
+    amPmIngreso: "AM" | "PM";
+    amPmEgreso: "AM" | "PM";
+  } | null>(null);
+
+  function ticketPatente(patente: number, tipo: "AC" | "M") {
+    const lugar = tipo === "AC" ? lugaresAC[indiceSeleccionadoAC] : lugaresM[indiceSeleccionadoM];
+    // Find the latest 'Agregado' event for this patente in historial
+    const ingreso = [...historial]
+      .reverse()
+      .find(h => h.patente === patente && h.evento === "Agregado");
+    const fechaIngreso = ingreso?.fecha || "";
+    const horaIngreso = ingreso?.hora || "";
+    const amPmIngreso = ingreso?.amPm === "AM" || ingreso?.amPm === "PM" ? ingreso.amPm : "AM";
+    // Use current time for egreso
+    const now = new Date();
+    const fechaEgreso = new Intl.DateTimeFormat('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(now);
+    const horaEgreso = new Intl.DateTimeFormat('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(now);
+    const amPmEgreso = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: true }).format(now).includes('AM') ? 'AM' : 'PM';
+    setTicketData({
+      patente,
+      lugar,
+      fechaIngreso,
+      fechaEgreso,
+      horaIngreso,
+      horaEgreso,
+      amPmIngreso: amPmIngreso as "AM" | "PM",
+      amPmEgreso: amPmEgreso as "AM" | "PM",
+    });
+    setTicketModalOpen(true);
+  }
+
   function toggle() {
     setToggleRandom(!toggleRandom);
   }
@@ -325,8 +373,14 @@ export default function Tables() {
         recaudarPatente={() => recaudarPatente(info.tipo, info.clickedIndex)}
         reubicarPatente={() => reubicarPatente(info.tipo, info.clickedIndex)}
         eliminarPatente={() => eliminarPatente(info.tipo, info.clickedIndex)}
+        ticketPatente={() => ticketPatente(info.patente, info.tipo)}
       />
       <PreciosPanel />
+      <TicketPopups
+        isOpen={ticketModalOpen}
+        onClose={() => setTicketModalOpen(false)}
+        ticketData={ticketData}
+      />
     </div>
   );
 }
