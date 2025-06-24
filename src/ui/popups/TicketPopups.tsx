@@ -90,8 +90,8 @@ const TicketPopups: React.FC<TicketPopupsProps> = ({
               : ticketData.lugar === "C"
                 ? "Camioneta"
                 : ticketData.lugar === "M"
-                  ? "Auto"
-                  : "Moto"}
+                  ? "Motocicleta"
+                  : "Desconocido"}
           </span>
           <div className="space-y-3">
             <div className="rounded-lg p-4">
