@@ -8,6 +8,16 @@ import PreciosPanel from "./PreciosPanel";
 import { getClaseEstilo } from "./style/GetClaseEstilo";
 import { getAllSettings } from "./style/GetSettings";
 
+// Move this function outside the component to avoid infinite re-renders
+function generarPatenteUnica(patentesAC: number[], patentesM: number[]): number {
+  while (true) {
+    const nueva = Math.floor(100000 + Math.random() * 900000);
+    if (!patentesAC.includes(nueva) && !patentesM.includes(nueva)) {
+      return nueva;
+    }
+  }
+}
+
 export default function Tables() {
   const [lugaresAC, setLugaresAC] = useState<("D" | "A" | "C")[]>([]);
   const [patentesAC, setPatentesAC] = useState<number[]>([]);
@@ -23,15 +33,6 @@ export default function Tables() {
   const initialSettings = getAllSettings();
   const capacidadAC = initialSettings.capacidadAC;
   const capacidadM = initialSettings.capacidadM;
-
-  function generarPatenteUnica(patentesAC: number[], patentesM: number[]): number {
-    while (true) {
-      const nueva = Math.floor(100000 + Math.random() * 900000);
-      if (!patentesAC.includes(nueva) && !patentesM.includes(nueva)) {
-        return nueva;
-      }
-    }
-  }
 
   function getInfoSeleccionada() {
     const tipo = mostRecentlyClicked;
@@ -84,7 +85,7 @@ export default function Tables() {
     setPatentesAC(estadoPatentesAC);
     setLugaresM(estadoLugaresM);
     setPatentesM(estadoPatentesM);
-  }, [capacidadAC, capacidadM, generarPatenteUnica]);
+  }, [capacidadAC, capacidadM]);
 
   useEffect(() => {
     inicializarEstacionamiento();
