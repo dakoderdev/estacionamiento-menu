@@ -249,6 +249,11 @@ const getVehicleIcon = (tipo: "A" | "C" | "M") => {
       return <CarIcon />;
   }
 };
+
+function formatoPatente(patente: number): string {
+    return patente.toString().padStart(6, "0");
+}
+
 export default function Historial({ historial }: HistorialProps) {
   return (
     <div className="relative border border-neutral-400/20 w-full shadow-lg rounded-md overflow-hidden max-h-50">
@@ -282,7 +287,7 @@ export default function Historial({ historial }: HistorialProps) {
                     )} w-fit border font-[family-name:var(--font-geist-mono)] flex items-center gap-0.5 text-xs mr-2 pl-2.5 pr-2.25 py-1 rounded-full`}
                   >
                     {getVehicleIcon(item.tipo)}
-                    {item.patente}
+                    {formatoPatente(item.patente)}
                   </span>
                   <span className="w-fit flex items-center gap-0.5 bg-neutral-600/20 border border-neutral-600/30 text-neutral-300 text-[0.5rem] mr-2 pl-2.5 pr-2.25 py-1 rounded-full">
                     <ClockIcon />
