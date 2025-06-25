@@ -8,6 +8,8 @@ import PreciosPanel from "./PreciosPanel";
 import { getClaseEstilo } from "./style/GetClaseEstilo";
 import { getAllSettings } from "./style/GetSettings";
 import TicketPopups from "./popups/TicketPopups";
+import HistorialPopups from "./popups/HistorialPopups";
+import EditarPopups from "./popups/EditarPopups";
 
 // Move this function outside the component to avoid infinite re-renders
 function generarPatenteUnica(patentesAC: number[], patentesM: number[]): number {
@@ -279,14 +281,12 @@ export default function Tables() {
 
   function ticketPatente(patente: number, tipo: "AC" | "M") {
     const lugar = tipo === "AC" ? lugaresAC[indiceSeleccionadoAC] : lugaresM[indiceSeleccionadoM];
-    // Find the latest 'Agregado' event for this patente in historial
     const ingreso = [...historial]
       .reverse()
       .find(h => h.patente === patente && h.evento === "Agregado");
     const fechaIngreso = ingreso?.fecha || "";
     const horaIngreso = ingreso?.hora || "";
     const amPmIngreso = ingreso?.amPm === "AM" || ingreso?.amPm === "PM" ? ingreso.amPm : "AM";
-    // Use current time for egreso
     const now = new Date();
     const fechaEgreso = new Intl.DateTimeFormat('es-AR', {
       day: '2-digit',
@@ -309,7 +309,20 @@ export default function Tables() {
       amPmIngreso: amPmIngreso as "AM" | "PM",
       amPmEgreso: amPmEgreso as "AM" | "PM",
     });
-    setTicketModalOpen(true);
+    setHistorialModalOpen(false);
+    setTicketModalOpen(!ticketModalOpen);
+  }
+
+  const [historialModalOpen, setHistorialModalOpen] = useState(false);
+
+  function historialPatente(patente: number) {
+    setHistorialModalOpen(!historialModalOpen);
+  }
+
+  const [editarModalOpen, setEditarModalOpen] = useState(false);
+
+  function editarPatente(patente: number) {
+    setEditarModalOpen(!editarModalOpen);
   }
 
   function toggle() {
@@ -339,7 +352,7 @@ export default function Tables() {
   const handleClickM = handleClick("M", setIndiceSeleccionadoM, patentesM, setMostRecentlyClicked);
 
   return (
-    <div className="grid grid-cols-2 mx-auto gap-4 w-fit">
+    <div className="grid lg:grid-cols-2 mx-auto gap-4 w-fit">
       <RandomToggle toggleRandom={toggleRandom} toggle={toggle} />
       {lugaresAC.length > 0 && lugaresM.length > 0 && (
         <>
@@ -374,12 +387,103 @@ export default function Tables() {
         reubicarPatente={() => reubicarPatente(info.tipo, info.clickedIndex)}
         eliminarPatente={() => eliminarPatente(info.tipo, info.clickedIndex)}
         ticketPatente={() => ticketPatente(info.patente, info.tipo)}
+        historialPatente={() => historialPatente(info.patente)}
+        editarPatente={() => editarPatente(info.patente)}
       />
       <PreciosPanel />
       <TicketPopups
         isOpen={ticketModalOpen}
         onClose={() => setTicketModalOpen(false)}
         ticketData={ticketData}
+      />
+      <HistorialPopups
+        historial={historial.filter(h => h.patente === info.patente)}
+        isOpen={historialModalOpen}
+        onClose={() => setHistorialModalOpen(false)}
+        />
+      <EditarPopups
+        isOpen={editarModalOpen}
+        onClose={() => setEditarModalOpen(false)}
+        patenteInicial={info.patente}
+        tipoInicial={info.lugar as "A" | "C" | "M"}
+        onSave={(nuevaPatente: number, nuevoTipo : "A" | "C" | "M") => {
+            // Determine if the type is changing between AC and M
+            const isChangingGrid =
+            (info.lugar === "A" || info.lugar === "C") && nuevoTipo === "M" ||
+            info.lugar === "M" && (nuevoTipo === "A" || nuevoTipo === "C");
+
+            if (isChangingGrid) {
+            if (nuevoTipo === "M") {
+              // Move from AC to M
+              const emptyIndex = lugaresM.findIndex(l => l === "D");
+              if (emptyIndex === -1) {
+              alert("No hay lugares disponibles para motos.");
+              setEditarModalOpen(false);
+              return;
+              }
+              // Remove from AC
+              const nuevasLugaresAC = [...lugaresAC];
+              const nuevasPatentesAC = [...patentesAC];
+              nuevasLugaresAC[info.clickedIndex] = "D";
+              nuevasPatentesAC[info.clickedIndex] = 0;
+              setLugaresAC(nuevasLugaresAC);
+              setPatentesAC(nuevasPatentesAC);
+
+              // Add to M
+              const nuevasLugaresM = [...lugaresM];
+              const nuevasPatentesM = [...patentesM];
+              nuevasLugaresM[emptyIndex] = "M";
+              nuevasPatentesM[emptyIndex] = nuevaPatente;
+              setLugaresM(nuevasLugaresM);
+              setPatentesM(nuevasPatentesM);
+
+              logEvento(emptyIndex, "M", "Editado", nuevaPatente);
+            } else {
+              // Move from M to AC (A or C)
+              const emptyIndex = lugaresAC.findIndex(l => l === "D");
+              if (emptyIndex === -1) {
+              alert("No hay lugares disponibles para autos/camionetas.");
+              setEditarModalOpen(false);
+              return;
+              }
+              // Remove from M
+              const nuevasLugaresM = [...lugaresM];
+              const nuevasPatentesM = [...patentesM];
+              nuevasLugaresM[info.clickedIndex] = "D";
+              nuevasPatentesM[info.clickedIndex] = 0;
+              setLugaresM(nuevasLugaresM);
+              setPatentesM(nuevasPatentesM);
+
+              // Add to AC
+              const nuevasLugaresAC = [...lugaresAC];
+              const nuevasPatentesAC = [...patentesAC];
+              nuevasLugaresAC[emptyIndex] = nuevoTipo;
+              nuevasPatentesAC[emptyIndex] = nuevaPatente;
+              setLugaresAC(nuevasLugaresAC);
+              setPatentesAC(nuevasPatentesAC);
+
+              logEvento(emptyIndex, nuevoTipo, "Editado", nuevaPatente);
+            }
+            } else {
+            // Same grid, just update
+            if (info.tipo === "AC") {
+              const nuevasPatentes = [...patentesAC];
+              const nuevasLugares = [...lugaresAC];
+              nuevasPatentes[info.clickedIndex] = nuevaPatente;
+              nuevasLugares[info.clickedIndex] = nuevoTipo;
+              setPatentesAC(nuevasPatentes);
+              setLugaresAC(nuevasLugares);
+              logEvento(info.clickedIndex, nuevoTipo, "Editado", nuevaPatente);
+            } else {
+              const nuevasPatentes = [...patentesM];
+              // tipo moto siempre es "M"
+              nuevasPatentes[info.clickedIndex] = nuevaPatente;
+              setPatentesM(nuevasPatentes);
+              logEvento(info.clickedIndex, "M", "Editado", nuevaPatente);
+            }
+            }
+            setEditarModalOpen(false);
+        }}
       />
     </div>
   );

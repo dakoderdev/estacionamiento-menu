@@ -1,28 +1,27 @@
-interface HistorialProps {
-  historial: {
-    indice: number;
-    tipo: "A" | "C" | "M";
-    evento: string;
-    patente: number;
-    fecha: string;
-    hora: string;
-    amPm: "AM" | "PM" | "";
-  }[];
+import React from "react";
+
+interface HistorialEntry {
+  indice: number;
+  tipo: "A" | "C" | "M";
+  evento: string;
+  patente: number;
+  fecha: string;
+  hora: string;
+  amPm: "AM" | "PM" | "";
 }
 
+interface HistorialPopupsProps {
+  isOpen: boolean;
+  onClose: () => void;
+  historial: HistorialEntry[];
+}
+
+const formatoPatente = (patente: number): string =>
+  patente.toString().padStart(6, "0");
+
+// Íconos
 const ClockIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-3 w-3"
-  >
+  <svg className="h-3 w-3" /* ... resto igual */ viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
     <path d="M12 7v5l3 3" />
@@ -30,31 +29,12 @@ const ClockIcon = () => (
 );
 
 const CalendarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-3 w-3"
-  >
+  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
     <path d="M16 3v4" />
     <path d="M8 3v4" />
     <path d="M4 11h16" />
-    <path d="M7 14h.01" />
-    <path d="M10 14h.01" />
-    <path d="M13 14h.01" />
-    <path d="M16 14h.01" />
-    <path d="M7 17h.01" />
-    <path d="M10 17h.01" />
-    <path d="M13 17h.01" />
-    <path d="M16 17h.01" />
   </svg>
 );
 
@@ -118,7 +98,6 @@ const MotorbikeIcon = () => (
   </svg>
 );
 
-// SVG for Plus icon (from Tabler Icons: icon-tabler-plus)
 const PlusIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -250,60 +229,70 @@ const getVehicleIcon = (tipo: "A" | "C" | "M") => {
   }
 };
 
-function formatoPatente(patente: number): string {
-    return patente.toString().padStart(6, "0");
-}
+const HistorialPopups: React.FC<HistorialPopupsProps> = ({
+  isOpen,
+  onClose,
+  historial,
+}) => {
+  if (!isOpen) return null;
 
-export default function Historial({ historial }: HistorialProps) {
   return (
-    <div className="relative border border-neutral-400/20 w-full shadow-lg rounded-md overflow-hidden max-h-50">
-      <h3 className="absolute top-0 w-[calc(100%-10px)] bg-background/85 border-b border-background backdrop-blur-sm z-10 text-lg font-semibold p-3 pb-1.5">
-        Historial
-      </h3>
-      <div className="overflow-y-scroll pt-[3rem] h-full">
-        <div className="flex flex-col-reverse gap-2 w-fit mx-auto p-3 pt-0">
-          {historial.length === 0 ? (
-            <div className="text-neutral-400 text-sm text-center py-4">
-              No hay historial disponible.
-            </div>
-          ) : (
-            historial.map((item, index) => (
+    <div className="fixed inset-0 z-50 flex font-sans items-center justify-center bg-background/60 backdrop-blur-md">
+      <div className="z-200 border border-neutral-400/20 bg-background/85 rounded-lg shadow-lg p-6 min-w-[320px] max-h-[80vh] overflow-y-auto relative">
+        <button
+          className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity text-2xl"
+          onClick={onClose}
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+        <h2 className="text-2xl font-semibold pb-4 mb-4 border-b border-neutral-400/20 border-dashed text-center">
+          Historial de Patente
+        </h2>
+
+        {historial.length === 0 ? (
+          <p className="text-center text-sm opacity-60">Sin registros disponibles</p>
+        ) : (
+          <div className="flex flex-col-reverse gap-2 w-fit mx-auto">
+            {historial.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 w-full justify-between"
+                className="flex items-center gap-2 justify-between"
               >
                 <div
-                  className={`flex items-center gap-1 opacity-50 text-sm min-w-20 font-medium w-fit truncate ${getEventColorClass(
-                    item.evento
-                  )}`}
+                  className={`flex items-center gap-1 opacity-50 text-sm min-w-20 font-medium ${getEventColorClass(item.evento)}`}
                 >
                   {getEventIcon(item.evento)}
                   {item.evento}
                 </div>
-                <div className="grid grid-cols-[auto_auto_auto] gap-0.25">
+                <div className="grid grid-cols-[auto_auto_auto] gap-1">
                   <span
-                    className={`${getTipoBadgeClass(
-                      item.tipo
-                    )} w-fit border font-mono flex items-center gap-0.5 text-xs mr-2 pl-2.5 pr-2.25 py-1 rounded-full`}
+                    className={`${getTipoBadgeClass(item.tipo)} border font-mono flex items-center gap-1 text-xs pl-2 pr-2 py-1 rounded-full`}
                   >
                     {getVehicleIcon(item.tipo)}
                     {formatoPatente(item.patente)}
                   </span>
-                  <span className="w-fit flex items-center font-mono gap-0.5 bg-neutral-600/20 border border-neutral-600/30 text-neutral-300 text-[0.5rem] mr-2 pl-2.5 pr-2.25 py-1 rounded-full">
+                  <span className="flex items-center font-mono gap-1 bg-neutral-600/20 border border-neutral-600/30 text-neutral-300 text-xs pl-2 pr-2 py-1 rounded-full">
                     <ClockIcon />
-                    <b className="text-xs font-normal">{item.hora}</b>
+                    <b className="font-normal">{item.hora}</b>
                     {item.amPm}
                   </span>
-                  <span className="w-fit flex items-center font-mono gap-0.5 bg-neutral-600/20 border border-neutral-600/30 text-neutral-300 text-xs mr-2 pl-2.5 pr-2.25 py-1 rounded-full">
+                  <span className="flex items-center font-mono gap-1 bg-neutral-600/20 border border-neutral-600/30 text-neutral-300 text-xs pl-2 pr-2 py-1 rounded-full">
                     <CalendarIcon />
                     {item.fecha}
                   </span>
                 </div>
               </div>
-            ))
-          )}
+            ))}
+          </div>
+        )}
+
+        <div className="text-center pt-2 border-t border-dashed border-gray-700 mt-4">
+          <p className="text-xs opacity-70">Fin del historial</p>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default HistorialPopups;

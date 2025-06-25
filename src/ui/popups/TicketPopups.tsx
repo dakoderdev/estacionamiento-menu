@@ -67,7 +67,7 @@ const TicketPopups: React.FC<TicketPopupsProps> = ({
   const clase = getClaseEstilo(ticketData.lugar);
   return (
     <div className="fixed inset-0 z-50 flex font-sans items-center justify-center bg-background/60 backdrop-blur-md">
-      <div className="border border-neutral-400/20 bg-background/85 rounded-lg shadow-lg p-8 min-w-[320px] relative">
+      <div className="z-200 border border-neutral-400/20 bg-background/85 rounded-lg shadow-lg p-8 min-w-[320px] relative">
         <button
           className="absolute top-2 right-2 w-5 flex items-center justify-center h-5 cursor-pointer hover:opacity-80 transition-opacity text-2xl"
           onClick={onClose}
