@@ -279,11 +279,11 @@ export default function Tables() {
     amPmEgreso: "AM" | "PM";
   } | null>(null);
 
-  function ticketPatente(patente: number, tipo: "AC" | "M") {
+  function ticketPatente(tipo: "AC" | "M") {
     const lugar = tipo === "AC" ? lugaresAC[indiceSeleccionadoAC] : lugaresM[indiceSeleccionadoM];
     const ingreso = [...historial]
       .reverse()
-      .find(h => h.patente === patente && h.evento === "Agregado");
+      .find(h => h.patente === info.patente && h.evento === "Agregado");
     const fechaIngreso = ingreso?.fecha || "";
     const horaIngreso = ingreso?.hora || "";
     const amPmIngreso = ingreso?.amPm === "AM" || ingreso?.amPm === "PM" ? ingreso.amPm : "AM";
@@ -300,7 +300,7 @@ export default function Tables() {
     }).format(now);
     const amPmEgreso = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: true }).format(now).includes('AM') ? 'AM' : 'PM';
     setTicketData({
-      patente,
+      patente: info.patente,
       lugar,
       fechaIngreso,
       fechaEgreso,
@@ -316,12 +316,14 @@ export default function Tables() {
   const [historialModalOpen, setHistorialModalOpen] = useState(false);
 
   function historialPatente(patente: number) {
+    console.log(patente);
     setHistorialModalOpen(!historialModalOpen);
   }
 
   const [editarModalOpen, setEditarModalOpen] = useState(false);
 
   function editarPatente(patente: number) {
+    console.log(patente);
     setEditarModalOpen(!editarModalOpen);
   }
 
@@ -386,7 +388,7 @@ export default function Tables() {
         recaudarPatente={() => recaudarPatente(info.tipo, info.clickedIndex)}
         reubicarPatente={() => reubicarPatente(info.tipo, info.clickedIndex)}
         eliminarPatente={() => eliminarPatente(info.tipo, info.clickedIndex)}
-        ticketPatente={() => ticketPatente(info.patente, info.tipo)}
+        ticketPatente={() => ticketPatente(info.tipo)}
         historialPatente={() => historialPatente(info.patente)}
         editarPatente={() => editarPatente(info.patente)}
       />
@@ -470,7 +472,9 @@ export default function Tables() {
               const nuevasPatentes = [...patentesAC];
               const nuevasLugares = [...lugaresAC];
               nuevasPatentes[info.clickedIndex] = nuevaPatente;
-              nuevasLugares[info.clickedIndex] = nuevoTipo;
+              if (nuevoTipo === "A" || nuevoTipo === "C") {
+                nuevasLugares[info.clickedIndex] = nuevoTipo;
+              }
               setPatentesAC(nuevasPatentes);
               setLugaresAC(nuevasLugares);
               logEvento(info.clickedIndex, nuevoTipo, "Editado", nuevaPatente);

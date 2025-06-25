@@ -32,23 +32,24 @@ function tiempoTotal(
 ): string {
     // Combine date and time strings into ISO format
     function toDateTime(fecha: string, hora: string, ampm: "AM" | "PM") {
-    if (!fecha || !hora) return null;
-    // Convert "hh:mm" and AM/PM to 24h
-    let [h, m] = hora.split(":").map(Number);
-    if (ampm === "PM" && h < 12) h += 12;
-    if (ampm === "AM" && h === 12) h = 0;
-    // Convert "DD/MM/YYYY" to "YYYY-MM-DD"
-    const [day, month, year] = fecha.split("/");
-    const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    return new Date(`${isoDate}T${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`);
-}
+        if (!fecha || !hora) return null;
+        // Convert "hh:mm" and AM/PM to 24h
+        let h = Number(hora.split(":")[0]);
+        const m = Number(hora.split(":")[1]);
+        if (ampm === "PM" && h < 12) h += 12;
+        if (ampm === "AM" && h === 12) h = 0;
+        // Convert "DD/MM/YYYY" to "YYYY-MM-DD"
+        const [day, month, year] = fecha.split("/");
+        const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        return new Date(`${isoDate}T${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`);
+    }
 
     const d1 = toDateTime(fechaIngreso, horaIngreso, amPmIngreso);
     const d2 = toDateTime(fechaEgreso, horaEgreso, amPmEgreso);
 
     if (!d1 || !d2 || isNaN(d1.getTime()) || isNaN(d2.getTime())) return "No disponible";
 
-    let ms = d2.getTime() - d1.getTime();
+    const ms = d2.getTime() - d1.getTime();
     if (ms < 0) return "No disponible";
 
     const totalMinutes = Math.floor(ms / 60000);
